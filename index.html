@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="LSCD: Lomb–Scargle Conditioned Diffusion">
+  <meta name="keywords" content="time-series, diffusion models, Lomb–Scargle, ICML 2025">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LSCD · Lomb–Scargle Conditioned Diffusion</title>
+
+  <!-- Google / Bulma / Icons -->
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/themes/prism.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/themes/prism-okaidia.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/prism.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/components/prism-latex.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/components/prism-python.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+
+  <!-- Highlight.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/latex.min.js"></script>
+  <script>hljs.highlightAll();</script>
+
+  <style>
+    /* Typography & base colours */
+    body{font-family:'Google Sans','Noto Sans',sans-serif;background:#f9f9f9;color:#333;
+         background-image:linear-gradient(to bottom,#fff,#f5f5f5)}
+    a{transition:color .3s;text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* Hero banner */
+    .hero{background:#fff; /*linear-gradient(135deg,rgba(0,138,215,.07),rgba(246,137,70,.07));*/
+           border-bottom:1px solid rgba(0,0,0,.05);transition:.3s}
+    .hero:hover{background:#fff;/*linear-gradient(135deg,rgba(0,138,215,.10),rgba(246,137,70,.10))*/}
+    .publication-title{background:#1b1b1b; /*linear-gradient(90deg,#008AD7,#f68946);*/
+                       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+                       cursor:pointer;
+                       transition:text-shadow .3s,color .3s}
+/*     .publication-title:hover{text-shadow:0 0 10px rgba(0,138,215,.45)} */
+
+    /* Re-usable section card */
+    .section{padding:2rem 1.5rem;background:#fff;margin:1rem auto;border-radius:12px;
+             box-shadow:0 4px 12px rgba(0,0,0,.03);border:1px solid rgba(0,0,0,.05);
+             transition:.3s}
+    .section:hover{box-shadow:0 6px 18px rgba(0,0,0,.06);transform:translateY(-2px)}
+
+    /* Fancy H2 underline */
+    .title.is-3{position:relative;padding-bottom:.5rem;margin-bottom:1.5rem}
+    .title.is-3:after{content:"";position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+                      width:80px;height:3px;
+                      /*background:linear-gradient(90deg,#008AD7,#f68946);*/border-radius:3px;
+                      transition:width .3s}
+    .title.is-3:hover:after{width:120px}
+
+    /* Feature cards */
+    .feature-item{background:#fff;padding:1.5rem;margin-bottom:1.5rem;border-left:4px solid #008AD7;
+                  border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.05);transition:.3s}
+    .feature-item:nth-child(odd){border-left-color:#f68946}
+    .feature-item:hover{transform:translateY(-4px);box-shadow:0 8px 16px rgba(0,0,0,.08)}
+    .feature-number{font-size:2rem;font-weight:bold;color:rgba(0,138,215,.2);margin-bottom:.5rem}
+    .feature-item:nth-child(odd) .feature-number{color:rgba(246,137,70,.2)}
+
+    /* Figures */
+    figure{background:#fff;padding:1rem;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.08);
+           margin-bottom:2rem;transition:.3s;overflow:hidden; border: 1px solid black;}
+    figure:hover{transform:translateY(-5px);box-shadow:0 12px 24px rgba(0,0,0,.12); transform: scale(1.1);}
+    figure img{cursor:zoom-in;transition:opacity .3s}
+    figure img:hover{opacity:.9}
+    figcaption{padding:1rem .5rem;font-size:.9rem;color:#666;border-top:1px solid #eee;margin-top:1rem}
+
+    /* Paper-button bar */
+    .resource-btn{margin:.4rem;background:#1b1b1b;
+                  color:#fff;border:none;border-radius:999px;box-shadow:0 3px 6px rgba(0,0,0,.2);
+                  transition:.3s;display:inline-flex;align-items:center;padding:.6rem 1.2rem}
+    .resource-btn:hover{transform:translateY(-3px); color:#fff;}
+    .resource-btn .icon{margin-right:.5em}
+
+    /* Tables */
+    .table{box-shadow:0 2px 8px rgba(0,0,0,.05);border-radius:8px;overflow:hidden;}
+    .table tr:hover{background:rgba(0,138,215,.05);transition:.3s;}
+    .table thead{background:#f5f5f5;}
+    .table th{transition:background-color .3s;}
+    .table tr:hover td{color:#4675f6;}
+    .table td, .table th {
+      text-align: center !important;
+      vertical-align: middle;
+    }
+    /* .table td{text-align:center;} */
+
+
+    /* Quick-start code block */
+    pre{background:#282c34;color:#abb2bf;font-family:'Fira Code',monospace;font-size:14px;
+        line-height:1.5;border-radius:8px;padding:20px;overflow-x:auto;box-shadow:0 4px 12px rgba(0,0,0,.08);
+        transition:.3s}
+    pre:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.12)}
+  </style>
+</head>
+
+<body>
+<!-- ───────────── HERO ───────────── -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop has-text-centered">
+      <h1 class="title is-1 publication-title">
+        LSCD · Lomb–Scargle Conditioned Diffusion for Time Series Imputation
+      </h1>
+
+      <!-- ICML annotation -->
+      <div class="notification is-light" style="margin:0 auto 1.8rem auto;
+           border-radius:8px; font-size:20px;">
+			<span class="has-text-weight-semibold">International Conference on Machine Learning (ICML 2025)</span>
+      </div>
+
+      <!-- Author list -->
+      <div class="is-size-5 publication-authors">
+        <span class="author-block"><a href="#" target="_blank" style="font-weight:bold">
+          Elizabeth Fons<sup>1*</sup></a>,</span>
+          <span class="author-block"><a href="#" target="_blank" style="font-weight:bold">Alejandro Sztrajman<sup>2*</sup></a>,</span>
+        <span class="author-block"><a href="#" style="font-weight:bold">
+          Yousef El-Laham<sup>1</sup></a>,</span>
+        <span class="author-block"><a href="#" style="font-weight:bold">
+          Luciana Ferrer<sup>3</sup></a>,</span><br>
+        <span class="author-block"><a href="#" style="font-weight:bold">
+          Svitlana Vyetrenko<sup>1</sup></a>,</span>
+        <span class="author-block"><a href="#" style="font-weight:bold">
+          Manuela Veloso<sup>1</sup></a></span>
+      </div>
+<!-- 		<br> -->
+
+      <div class="publication-authors">
+        <span class="author-block"><sup>1</sup>J.P. Morgan AI Research</span>&nbsp;&nbsp;&nbsp;
+        <span class="author-block"><sup>2</sup>University of Cambridge</span>&nbsp;&nbsp;&nbsp;
+        <span class="author-block"><sup>3</sup>UBA & CONICET</span>
+        <br>
+        <small>*equal contribution</small>
+      </div>
+
+      <!-- Buttons -->
+      <div style="margin-top:1.8rem">
+        <a class="resource-btn" href="assets/icml2025.pdf"><span class="icon"><i class="ai ai-arxiv"></i></span>Paper</a>
+        <a class="resource-btn" href="https://github.com/asztr/LombScargle"><span class="icon"><i class="fab fa-github"></i></span>Code</a>
+        <!-- <a class="resource-btn" href="assets/LSCD_poster.pdf"><span class="icon"><i class="fas fa-image"></i></span>Poster</a> -->
+        <!-- <a class="resource-btn" href="assets/LSCD_slides.pdf"><span class="icon"><i class="fas fa-chalkboard-teacher"></i></span>Slides</a> -->
+        <a class="resource-btn" href="https://colab.research.google.com/github/asztr/LombScargle/blob/main/notebooks/demo.ipynb"><span class="icon"><i class="fab fa-google"></i></span>Colab</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── ABSTRACT ───────────── -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Abstract</h2>
+      <!-- Paper hero image -->
+      <!--<img src="assets/LSCD_teaser.png" alt="LSCD teaser" style="max-width:85%;border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,.1);margin-bottom:2rem">-->
+    <p class="abstract-text" style="text-align:justify;">
+      Time series imputation with missing or irregularly sampled data is a persistent challenge in machine learning.
+      Most frequency-domain methods rely on the Fast Fourier Transform (FFT), which assumes uniform sampling, therefore
+      requiring interpolation or imputation prior to frequency estimation. We propose a novel diffusion-based imputation
+      approach (LSCD) that leverages Lomb–Scargle periodograms to robustly handle missing and irregular samples without
+      requiring interpolation or imputation in the frequency domain. Our method trains a score-based diffusion model
+      conditioned on the entire signal spectrum, enabling direct usage of irregularly spaced observations.
+      Experiments on synthetic and real-world benchmarks demonstrate that our method recovers missing data more accurately
+      than purely time-domain baselines, while simultaneously producing consistent frequency estimates. Crucially, our
+      framework paves the way for broader adoption of Lomb–Scargle methods in machine learning tasks involving irregular data.
+      <!-- <strong>Motivation —</strong> irregular time-series cripple most diffusion-based imputers because FFTs assume uniform sampling.  
+      <strong>Approach —</strong> LSCD plugs a differentiable Lomb–Scargle periodogram into each score-matching step and enforces a spectral-consistency loss.  
+      <strong>Results —</strong> On PhysioNet ICU and Beijing PM 2.5 with up to <em>90 % missingness</em>, LSCD lowers MAE by 4–10 % and halves Spectral-MAE vs CSDI and ANT baselines while preserving realistic frequency content. -->
+    </p>
+  </div>
+</section>
+
+<!-- ───────────── LOMB-SCARGLE ───────────── -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Lomb-Scargle</h2>
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+          <div class="content has-text-justified">
+            <b>FFT vs Lomb-Scargle:</b> FFT assumes uniform sampling, requiring interpolation when missing or irregularly sampled data is present.
+            <span style="color:#4675f6"><b>Lomb-Scargle</b></span> operates on irregular data directly, avoiding interpolation and providing a more accurate frequency estimate.
+            <br>
+            <figure>
+              <img src="assets/ls_vs_fft.svg"/>
+              <figcaption>
+				        <b>Figure 1:</b> Density of leading frequencies for FFT and Lomb-Scargle (LS) on a synthetic sine dataset.
+                (Left) Fully observed time series. (Right) Time series with 75% missing data. The interpolation required
+                by FFT significantly distorts the spectral distribution, whereas LS better preserves the original frequency structure.
+              </figcaption>
+            </figure>
+            <p></p>
+          </div>
+        </div>
+      </div>
+  </div>
+</section>
+
+<!-- ───────────── DIAGRAM ───────────── -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Model Architecture</h2>
+    <div class="columns is-centered">
+        <div class="column is-full-width">
+          <div class="content has-text-justified">
+            <figure>
+              <img src="assets/lscd_diagram.svg"/>
+              <figcaption>
+				        <b>Figure 2:</b> Diagram of our Lomb–Scargle Conditioned Diffusion (LSCD) approach for time series imputation.
+              </figcaption>
+            </figure>
+            <p></p>
+          </div>
+        </div>
+      </div>
+  </div>
+</section>
+
+<!-- ───────────── SYNTHETIC BENCHMARK (TABLE 1) ───────────── -->
+<section id="table-synthetic" class="section">
+  <div class="container is-max-desktop">
+    <details style="cursor:pointer"><summary><h2 class="title is-3 has-text-centered">Synthetic-Sines Benchmark</h2></summary>
+      <!-- <div style="overflow-x:auto"> -->
+        <table class="table is-bordered is-striped is-hoverable is-fullwidth is-size-7">
+          <thead>
+            <tr>
+              <th rowspan="2">Miss Type</th><th rowspan="2">Miss rate</th><th rowspan="2">Metric</th><th colspan="10">Method</th>
+            </tr>
+            <tr>
+              <th>Mean</th><th>Lerp</th><th>BRITS</th><th>GP-VAE</th><th>US-GAN</th>
+              <th>TimesNet</th><th>CSDI</th><th>SAITS</th><th>ModernTCN</th><th style="color:#bf0000;">LSCD</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- ───── Point/MCAR ───── -->
+            <tr><td rowspan="9">MCAR</td><td rowspan="3">10 %</td><td>MAE</td><td>1.380</td><td>1.305</td><td>0.943</td><td>1.399</td><td>0.933</td><td>1.220</td><td>1.336</td><td>0.885</td><td>0.973</td><td><b>0.765</b></td></tr>
+            <tr><td>RMSE</td><td>1.947</td><td>1.991</td><td>1.657</td><td>1.986</td><td>1.636</td><td>1.803</td><td>1.889</td><td>1.569</td><td>1.727</td><td><b>1.453</b></td></tr>
+            <tr><td>S-MAE</td><td>0.081</td><td>0.081</td><td>0.052</td><td>0.082</td><td>0.053</td><td>0.069</td><td>0.008</td><td>0.043</td><td>0.049</td><td><b>0.003</b></td></tr>
+
+            <tr><td rowspan="3">50 %</td><td>MAE</td><td>1.373</td><td>1.449</td><td>1.095</td><td>1.383</td><td>1.152</td><td>1.481</td><td>1.359</td><td>1.041</td><td>1.129</td><td><b>0.975</b></td></tr>
+            <tr><td>RMSE</td><td>1.930</td><td>2.070</td><td>1.759</td><td>1.950</td><td>1.845</td><td>2.017</td><td>1.922</td><td>1.699</td><td>1.817</td><td><b>1.658</b></td></tr>
+            <tr><td>S-MAE</td><td>0.264</td><td>0.324</td><td>0.170</td><td>0.266</td><td>0.191</td><td>0.239</td><td>0.027</td><td>0.159</td><td>0.173</td><td><b>0.014</b></td></tr>
+
+            <tr><td rowspan="3">90 %</td><td>MAE</td><td>1.375</td><td>1.586</td><td>1.320</td><td>1.377</td><td>1.369</td><td>1.579</td><td>1.361</td><td>1.292</td><td>1.360</td><td><b>1.271</b></td></tr>
+            <tr><td>RMSE</td><td>1.935</td><td>2.142</td><td>1.899</td><td>1.938</td><td>1.970</td><td>2.143</td><td>1.925</td><td>1.878</td><td>1.963</td><td><b>1.870</b></td></tr>
+            <tr><td>S-MAE</td><td>0.439</td><td>0.572</td><td>0.383</td><td>0.439</td><td>0.407</td><td>0.462</td><td>0.044</td><td>0.375</td><td>0.406</td><td><b>0.036</b></td></tr>
+
+            <!-- ───── Sequence ───── -->
+            <tr><td rowspan="9">Sequence</td><td rowspan="3">10 %</td><td>MAE</td><td>1.353</td><td>1.542</td><td>1.330</td><td>1.355</td><td>1.384</td><td>1.391</td><td>1.413</td><td><b>1.323</b></td><td>1.329</td><td>1.359</td></tr>
+            <tr><td>RMSE</td><td>1.905</td><td>2.092</td><td>1.915</td><td>1.908</td><td>1.995</td><td>1.959</td><td>1.988</td><td><b>1.890</b></td><td>1.931</td><td>1.962</td></tr>
+            <tr><td>S-MAE</td><td>0.055</td><td>0.075</td><td>0.056</td><td>0.054</td><td>0.061</td><td>0.062</td><td>0.006</td><td>0.055</td><td>0.056</td><td><b>0.005</b></td></tr>
+
+            <tr><td rowspan="3">50 %</td><td>MAE</td><td>1.374</td><td>1.564</td><td>1.347</td><td>1.376</td><td>1.393</td><td>1.467</td><td>1.378</td><td>1.342</td><td>1.354</td><td><b>1.316</b></td></tr>
+            <tr><td>RMSE</td><td>1.934</td><td>2.115</td><td>1.928</td><td>1.936</td><td>1.999</td><td>2.038</td><td>1.943</td><td>1.917</td><td>1.960</td><td><b>1.913</b></td></tr>
+            <tr><td>S-MAE</td><td>0.271</td><td>0.369</td><td>0.269</td><td>0.271</td><td>0.297</td><td>0.321</td><td>0.028</td><td>0.268</td><td>0.277</td><td><b>0.026</b></td></tr>
+
+            <tr><td rowspan="3">90 %</td><td>MAE</td><td>1.386</td><td>1.573</td><td>1.362</td><td>1.388</td><td>1.403</td><td>1.489</td><td>1.372</td><td>1.352</td><td>1.375</td><td><b>1.313</b></td></tr>
+            <tr><td>RMSE</td><td>1.946</td><td>2.127</td><td>1.941</td><td>1.949</td><td>2.007</td><td>2.062</td><td>1.943</td><td>1.929</td><td>1.982</td><td><b>1.913</b></td></tr>
+            <tr><td>S-MAE</td><td>0.288</td><td>0.389</td><td>0.286</td><td>0.288</td><td>0.305</td><td>0.338</td><td>0.029</td><td>0.283</td><td>0.292</td><td><b>0.027</b></td></tr>
+
+            <!-- ───── Block ───── -->
+            <tr><td rowspan="9">Block</td><td rowspan="3">10 %</td><td>MAE</td><td>1.306</td><td>1.507</td><td>1.255</td><td>1.309</td><td>1.334</td><td>1.379</td><td>1.304</td><td>1.268</td><td>1.275</td><td><b>1.259</b></td></tr>
+            <tr><td>RMSE</td><td>1.807</td><td>2.014</td><td>1.786</td><td>1.811</td><td>1.885</td><td>1.898</td><td>1.804</td><td>1.785</td><td>1.825</td><td><b>1.774</b></td></tr>
+            <tr><td>S-MAE</td><td>0.105</td><td>0.146</td><td>0.100</td><td>0.104</td><td>0.116</td><td>0.124</td><td>0.011</td><td>0.103</td><td>0.106</td><td><b>0.010</b></td></tr>
+
+            <tr><td rowspan="3">50 %</td><td>MAE</td><td>1.306</td><td>1.505</td><td>1.279</td><td>1.308</td><td>1.333</td><td>1.451</td><td>1.314</td><td>1.285</td><td>1.309</td><td><b>1.269</b></td></tr>
+            <tr><td>RMSE</td><td>1.815</td><td>2.014</td><td>1.806</td><td>1.817</td><td>1.881</td><td>1.978</td><td>1.835</td><td><b>1.804</b></td><td>1.852</td><td>1.810</td></tr>
+            <tr><td>S-MAE</td><td>0.287</td><td>0.383</td><td>0.278</td><td>0.286</td><td>0.306</td><td>0.344</td><td>0.029</td><td>0.285</td><td>0.296</td><td><b>0.027</b></td></tr>
+
+            <tr><td rowspan="3">90 %</td><td>MAE</td><td>1.339</td><td>1.523</td><td>1.319</td><td>1.340</td><td>1.359</td><td>1.506</td><td>1.329</td><td><b>1.320</b></td><td>1.356</td><td><b>1.320</b></td></tr>
+            <tr><td>RMSE</td><td>1.868</td><td>2.052</td><td>1.862</td><td>1.869</td><td>1.927</td><td>2.054</td><td>1.874</td><td><b>1.859</b></td><td>1.916</td><td>1.870</td></tr>
+            <tr><td>S-MAE</td><td>0.359</td><td>0.473</td><td>0.351</td><td>0.358</td><td>0.376</td><td>0.439</td><td>0.036</td><td>0.358</td><td>0.374</td><td><b>0.035</b></td></tr>
+            <!--<p class="has-text-centered">Time-domain & frequency-domain errors (↓ is better). Values are copied verbatim from Table&nbsp;1 of the paper.</p>-->
+            <!-- <figcaption style="caption-side:bottom;text-align:center"> -->
+          </tbody>
+        </table>
+        <p style="text-align:justify;">
+          <b>Table 1:</b> Imputation performance on the Synthetic-Sines benchmark with three missing-data patterns:
+          MCAR (pointwise random), Sequence gaps, and Block outages, each tested at 10 %, 50 % and 90 % missing rates. ​
+          For every setting we report MAE↓ and RMSE↓ in the time domain, and S-MAE↓ on the spectral domain.
+        <!-- </figcaption> -->
+        </p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ───────────── REAL-WORLD DATASETS (TABLE 2) ───────────── -->
+<section id="table-real" class="section">
+  <div class="container is-max-desktop">
+    <details style="cursor:pointer"><summary><h2 class="title is-3 has-text-centered">Real Imputation Benchmarks</h2></summary>
+    <!-- <p class="has-text-centered">MAE ↓, RMSE ↓, S-MAE ↓ (best in <b>bold</b>). Reproduced from Table 2.</p> -->
+    <div style="overflow-x:auto">
+      <table class="table is-bordered is-striped is-hoverable is-fullwidth is-size-7">
+        <thead>
+          <tr><th rowspan="2">Dataset</th><th rowspan="2">Miss rate</th><th rowspan="2">Metric</th><th colspan="10">Method</th></tr>
+          <tr><th>Mean</th><th>Lerp</th><th>BRITS</th><th>GP-VAE</th><th>US-GAN</th><th>TimesNet</th><th>CSDI</th><th>SAITS</th><th align="center">ModernTCN</th><th style="color:#bf0000;">LSCD</th></tr>
+        </thead>
+        <tbody>
+          <!-- Physionet 10% -->
+          <tr><td rowspan="9">PhysioNet</td><td rowspan="3">10 %</td><td>MAE</td><td>0.714</td><td>0.372</td><td>0.278</td><td>0.469</td><td>0.323</td><td>0.375</td><td>0.219</td><td>0.232</td><td>0.351</td><td><b>0.211</b></td></tr>
+          <tr><td>RMSE</td><td>1.035</td><td>0.708</td><td>0.693</td><td>0.783</td><td>0.662</td><td>0.690</td><td>0.545</td><td>0.583</td><td>0.697</td><td><b>0.494</b></td></tr>
+          <tr><td>S-MAE</td><td>0.032</td><td>0.020</td><td>0.016</td><td>0.026</td><td>0.020</td><td>0.022</td><td>0.013</td><td>0.014</td><td>0.020</td><td><b>0.012</b></td></tr>
+          <!-- Physionet 50% -->
+          <tr><!--<td rowspan="3">PhysioNet</td>--><td rowspan="3">50 %</td><td>MAE</td><td>0.711</td><td>0.417</td><td>0.385</td><td>0.521</td><td>0.449</td><td>0.453</td><td>0.307</td><td>0.315</td><td>0.440</td><td><b>0.303</b></td></tr>
+          <tr><td>RMSE</td><td>1.091</td><td>0.840</td><td>0.833</td><td>0.907</td><td>0.852</td><td>0.840</td><td>0.672</td><td>0.735</td><td>0.803</td><td><b>0.664</b></td></tr>
+          <tr><td>S-MAE</td><td>0.111</td><td>0.087</td><td>0.064</td><td>0.083</td><td>0.076</td><td>0.076</td><td><b>0.052</b></td><td>0.055</td><td>0.071</td><td><b>0.052</b></td></tr>
+          <!-- Physionet 90% -->
+          <tr><!--<td rowspan="3">PhysioNet</td>--><td rowspan="3">90 %</td><td>MAE</td><td>0.710</td><td>0.565</td><td>0.560</td><td>0.642</td><td>0.670</td><td>0.642</td><td>0.481</td><td>0.565</td><td>0.647</td><td><b>0.479</b></td></tr>
+          <tr><td>RMSE</td><td>1.097</td><td>0.993</td><td>0.975</td><td>1.038</td><td>1.060</td><td>1.031</td><td>0.834</td><td>0.971</td><td>1.026</td><td><b>0.832</b></td></tr>
+          <tr><td>S-MAE</td><td>0.148</td><td>0.189</td><td>0.104</td><td>0.124</td><td>0.125</td><td>0.131</td><td><b>0.093</b></td><td>0.108</td><td>0.137</td><td><b>0.093</b></td></tr>
+          <!-- PM2.5 -->
+          <tr><td rowspan="3">PM 2.5</td><td rowspan="3">10 %</td><td>MAE</td><td>50.685</td><td>15.363</td><td>16.519</td><td>23.941</td><td>32.999</td><td>22.685</td><td>9.670</td><td>15.424</td><td>24.089</td><td><b>9.069</b></td></tr>
+          <tr><td>RMSE</td><td>66.558</td><td>27.658</td><td>26.775</td><td>40.586</td><td>48.951</td><td>39.336</td><td>19.093</td><td>30.558</td><td>40.052</td><td><b>17.914</b></td></tr>
+          <tr><td>S-MAE</td><td>0.135</td><td>0.039</td><td>0.039</td><td>0.060</td><td>0.080</td><td>0.056</td><td>0.023</td><td>0.034</td><td>0.059</td><td><b>0.022</b></td></tr>
+        </tbody>
+        <!-- <caption style="caption-side:bottom;text-align:center"><em>Table 2:</em> LSCD matches or outperforms all baselines on two challenging real-world datasets.</caption> -->
+      </table>
+      <p style="text-align:justify;">
+      <b>Table 2.</b> Time- and frequency-domain imputation errors on two real-world datasets. PhysioNet is evaluated
+      at 10%, 50% and 90% missingness rates, while PM 2.5 is evaluated at 10%. Metrics are MAE↓, RMSE↓ and S-MAE↓.
+      </p>
+    </div>
+    </details>
+  </div>
+</section>
+
+<!-- ───────────── LOMB–SCARGLE QUICK-START ───────────── -->
+<section id="ls-quickstart" class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Lomb-Scargle Spectrum: Quick Start</h2>
+    <p class="has-text-centered">`LombScargleBatchMask` (see Appendix C) is drop-in Torch. Example:</p>
+    <pre style="padding:0;"><code class="language-python" style="padding:1.5em;">import torch
+from lscd.spectral import LombScargleBatchMask   # same listing as paper, Section C
+
+# 1 . choose angular frequencies
+omegas = torch.linspace(0.1, 6.3, 256)        # ≈0.016–1 Hz if Δt=1 s
+ls = LombScargleBatchMask(omegas)
+
+# 2 . irregular sample times / values (batch size B = 1)
+t = torch.tensor([[0.1, 0.4, 1.2, 2.0, 3.9]])           # shape [B, N]
+y = torch.sin(2*torch.pi*1.0*t) + 0.05*torch.randn_like(t)
+mask = torch.ones_like(t, dtype=torch.bool)            # all valid
+
+# 3 . spectrum & dominant frequency
+P = ls(t, y, mask)                      # shape [B, M]
+f_hat = omegas[P.argmax(dim=1)]/(2*torch.pi)
+print(f_hat)        # → ≈ 1 Hz
+</code></pre>
+    <!-- <p class="is-size-7"><em>The class exactly matches Listing 1 in the appendix, offering a differentiable, batched periodogram with optional masks.</em></p> -->
+  </div>
+</section>
+
+<!-- ───────────── BIBTEX ───────────── -->
+<section class="section">
+	<div class="container is-max-desktop">
+		<h2 class="title is-3 has-text-centered">BibTeX</h2>
+<pre style="padding:0;"><code class="language-latex" style="padding:1.5em;">@inproceedings{lscd2025,
+  title     = {LSCD: Lomb–Scargle Conditioned Diffusion for Time-Series Imputation},
+  author    = {Elizabeth Fons and Alejandro Sztrajman and Yousef El-Laham and Luciana Ferrer and
+               Svitlana Vyetrenko and Manuela Veloso},
+  booktitle = {Proc. 42nd International Conference on Machine Learning},
+  year      = {2025}
+}</code></pre>
+	</div>
+</section>
+
+<!-- ───────────── FOOTER ───────────── -->
+<footer>
+  <div class="container is-max-desktop has-text-centered">
+    <p class="is-size-5"><strong>LSCD</strong> · ICML 2025</p>
+    <p>© 2025 LSCD Authors.</p>
+  </div>
+</footer>
+</body>
+</html>
+
