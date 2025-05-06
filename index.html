@@ -327,23 +327,25 @@
 <section id="ls-quickstart" class="section">
   <div class="container is-max-desktop">
     <h2 class="title is-3 has-text-centered">Lomb-Scargle Spectrum: Quick Start</h2>
-    <p class="has-text-centered">`LombScargleBatchMask` (see Appendix C) is drop-in Torch. Example:</p>
-    <pre style="padding:0;"><code class="language-python" style="padding:1.5em;">import torch
-from lscd.spectral import LombScargleBatchMask   # same listing as paper, Section C
+<b>Installation:</b>
+<pre style="padding:0;"><code style="padding:1.5em;">pip install git+https://github.com/asztr/LombScargle.git</code></pre>
+<br>
+<b>Usage Example:</b>
+<!-- <p class="has-text-centered">`LombScargleBatchMask` (see Appendix C) is drop-in Torch. Example:</p> -->
+<pre style="padding:0;"><code class="language-python" style="padding:1.5em;">import torch
+import math
+import LombScargle
 
-# 1 . choose angular frequencies
-omegas = torch.linspace(0.1, 6.3, 256)        # ≈0.016–1 Hz if Δt=1 s
-ls = LombScargleBatchMask(omegas)
+# Define example time series with single frequency = 5
+t = torch.linspace(0, 10.0, 200) #timestamps
+y = torch.sin(2*math.pi*5.0*t) #values
 
-# 2 . irregular sample times / values (batch size B = 1)
-t = torch.tensor([[0.1, 0.4, 1.2, 2.0, 3.9]])           # shape [B, N]
-y = torch.sin(2*torch.pi*1.0*t) + 0.05*torch.randn_like(t)
-mask = torch.ones_like(t, dtype=torch.bool)            # all valid
+# Select frequencies to evaluate
+freqs = torch.linspace(1e-5, 10.0, 100)
 
-# 3 . spectrum & dominant frequency
-P = ls(t, y, mask)                      # shape [B, M]
-f_hat = omegas[P.argmax(dim=1)]/(2*torch.pi)
-print(f_hat)        # → ≈ 1 Hz
+# Compute the normalized spectrum
+ls = LombScargle.LombScargle(freqs)
+P = ls(t, y, fap=True, norm=True)  # [1, 100] array of power values
 </code></pre>
     <!-- <p class="is-size-7"><em>The class exactly matches Listing 1 in the appendix, offering a differentiable, batched periodogram with optional masks.</em></p> -->
   </div>
